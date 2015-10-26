@@ -1,9 +1,18 @@
- int Motor_CW[3] = {22,28,36};
+int Motor_CW[3] = {22,28,36};
 int Motor_CCW[3] = {27,12,37};
 int Encoder[3] = {2,3,18};
 
 volatile int Encoder_Data[3] = {0,0,0};
 volatile int Encoder_Save[3] = {0,0,0};
+
+char Encoder_Serial[3] = {0,0,0};
+
+String Text_L;
+String Text_Ldata;
+String Text_C;
+String Text_Cdata;
+String Text_R;
+String Text_Rdata;
 
 int Motor_work[3] = {0,0,0};
 int Motor_way[3] = {0,0,0};
@@ -51,6 +60,25 @@ void loop() {
   delay(20);
 
   if(Only_Arduino == 0) {
+
+    Text_L = "L";
+    Text_C = "C";
+    Text_R = "R";
+
+    Text_Ldata = String(map(Encoder_Data[0],Motor_Min,Motor_Max,0,255));
+    Text_Cdata = String(map(Encoder_Data[1],Motor_Min,Motor_Max,0,255));
+    Text_Rdata = String(map(Encoder_Data[2],Motor_Min,Motor_Max,0,255));
+
+    Text_L.concat(Text_Ldata);
+    Text_C.concat(Text_Cdata);
+    Text_R.concat(Text_Rdata);
+
+    Text_L.concat(Text_C);
+    Text_L.concat(Text_R);
+
+    Serial.println(Text_L);
+    
+    /*
     Serial.print("L");
     Serial.print(map(Encoder_Data[0],Motor_Min,Motor_Max,0,255));
     Serial.print("C");
@@ -59,6 +87,7 @@ void loop() {
     Serial.print(map(Encoder_Data[2],Motor_Min,Motor_Max,0,255));
     
     Serial.println("");
+    */
   }
 }
 
