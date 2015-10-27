@@ -5,40 +5,46 @@ int Encoder[3] = {2,3,18};
 volatile int Encoder_Data[3] = {0,0,0};
 volatile int Encoder_Save[3] = {0,0,0};
 
-char Encoder_Serial[3] = {0,0,0};
-
-String Text_L;
-String Text_Ldata;
-String Text_C;
-String Text_Cdata;
-String Text_R;
-String Text_Rdata;
-
 int Motor_work[3] = {0,0,0};
 int Motor_way[3] = {0,0,0};
 
 int Motor_Min = 0;
 int Motor_Max = 0;
+int delay_time = 100;
 
-int Only_Arduino = 0;
+int AxisRead = 0;
+int AxisData[3] = {0,0,0};
+char AxisControl = 0;
 
-char buffers[9];
+char buffers[18];
+String stringWrite ="";
+
 
 void setup() {
   // put your setup code here, to run once:
+  Serial.begin(9600);
+  Serial.flush();
+
+  Serial.println("contacted.");
+  
+  delay(100);
+
   for(char i=0; i<3; i++) {
     pinMode(Motor_CW[i], OUTPUT);
     pinMode(Motor_CCW[i], OUTPUT);
     pinMode(Encoder[i], INPUT);
   }
 
-  Serial.begin(9600);
-  Serial.println("START");
-
   Motor_Min = 0;
   Motor_Max = 300;
+  delay_time = 20;
 
-  Only_Arduino = 0;
+  Serial.println("settings.");
+
+  Motor_START();
+
+  Serial.println("start.");
+  Serial.flush();
 }
 
 void loop() {
@@ -52,78 +58,95 @@ void loop() {
     int index = 0;
     int numChar = Serial.available();
 
-    if(numChar > 8) numChar = 8;
+    if(numChar > 18) numChar = 18;
     while(numChar--) buffers[index++] = Serial.read();
 
     splitString(buffers);
   }
-  delay(20);
 
-  if(Only_Arduino == 0) {
+  Move();
 
-    Text_L = "L";
-    Text_C = "C";
-    Text_R = "R";
+  stringWrite = "L";
+  stringWrite.concat(map(Encoder_Data[0], Motor_Min, Motor_Max, 0, 255));
+  stringWrite.concat("C");
+  stringWrite.concat(map(Encoder_Data[1], Motor_Min, Motor_Max, 0, 255));
+  stringWrite.concat("R");
+  stringWrite.concat(map(Encoder_Data[2], Motor_Min, Motor_Max, 0, 255));
 
-    Text_Ldata = String(map(Encoder_Data[0],Motor_Min,Motor_Max,0,255));
-    Text_Cdata = String(map(Encoder_Data[1],Motor_Min,Motor_Max,0,255));
-    Text_Rdata = String(map(Encoder_Data[2],Motor_Min,Motor_Max,0,255));
-
-    Text_L.concat(Text_Ldata);
-    Text_C.concat(Text_Cdata);
-    Text_R.concat(Text_Rdata);
-
-    Text_L.concat(Text_C);
-    Text_L.concat(Text_R);
-
-    Serial.println(Text_L);
-    
-    /*
-    Serial.print("L");
-    Serial.print(map(Encoder_Data[0],Motor_Min,Motor_Max,0,255));
-    Serial.print("C");
-    Serial.print(map(Encoder_Data[1],Motor_Min,Motor_Max,0,255));
-    Serial.print("R");
-    Serial.print(map(Encoder_Data[2],Motor_Min,Motor_Max,0,255));
-    
-    Serial.println("");
-    */
-  }
+  Serial.print(stringWrite);
+  Serial.print("\t");
+  Serial.print(AxisControl);
+  Serial.print("\t");
+  Serial.print(AxisData[0]);
+  Serial.print("\t");
+  Serial.print(AxisData[1]);
+  Serial.print("\t");
+  Serial.print(AxisData[2]);
+  Serial.println("");
+  delay(delay_time);
+  stringWrite="";
 }
 
 void splitString(char* data) {
-  if(Only_Arduino == 1) {
-    Serial.print("Data read : ");
-    Serial.println(data);
-  }
   char* parameter;
   parameter = strtok(data, ","); // "," 기준 데이터 값 잘라내기
   while(parameter != NULL) { // 아닐경우 다시 ","기준 재기
-    Move(parameter);
+    Command(parameter);
     parameter = strtok (NULL, ",");
   }
   
   //버퍼 초기화
-  for(int x = 0; x < 9; x++) {
+  for(int x = 0; x < 18; x++) {
     buffers[x] = '\0';
   }
   Serial.flush();
 }
 
-void Move(char* data) {
-  if(data[0] == 'a') Motor_UP(0);
-  if(data[0] == 'b') Motor_ST(0);
-  if(data[0] == 'c') Motor_DW(0);
+void Command(char* data) {
+  if((data[0] == 'L') || (data[0] == 'l')) {
+    AxisRead = strtol(data+1, NULL, 10);
+    AxisRead = constrain(AxisRead, 0, 255);
 
-  if(data[0] == 'd') Motor_UP(1);
-  if(data[0] == 'e') Motor_ST(1);
-  if(data[0] == 'f') Motor_DW(1);
+    AxisData[0] = AxisRead;
+  }
+  
+  if((data[0] == 'C') || (data[0] == 'c')) {
+    AxisRead = strtol(data+1, NULL, 10);
+    AxisRead = constrain(AxisRead, 0, 255);
 
-  if(data[0] == 'g') Motor_UP(2);
-  if(data[0] == 'h') Motor_ST(2);
-  if(data[0] == 'i') Motor_DW(2);
+    AxisData[1] = AxisRead;
+  }
+  
+  if((data[0] == 'R') || (data[0] == 'r')) {
+    AxisRead = strtol(data+1, NULL, 10);
+    AxisRead = constrain(AxisRead, 0, 255);
 
-  if(data[0] == 'y') Motor_FULLUP();
-  if(data[0] == 'x') Motor_FULLDOWN();
-  if(data[0] == 'r') Motor_RESET();
+    AxisData[2] = AxisRead;
+  }
+  
+  if((data[0] == 'X') || (data[0] == 'x')) AxisControl = 'x';
+  if((data[0] == 'Y') || (data[0] == 'y')) AxisControl = 'y';
+  if((data[0] == 'Z') || (data[0] == 'z')) AxisControl = 'z';
+  if((data[0] == 'S') || (data[0] == 's')) AxisControl = 0;
 }
+
+void Move(){
+  if((AxisControl == 'x') || (AxisControl == 'y') || (AxisControl == 'z')) {
+    if(AxisControl == 'x') Motor_FULLUP();
+    if(AxisControl == 'y') Motor_FULLDW();
+    if(AxisControl == 'z') Motor_RESET();
+  }else {
+    if(AxisData[0] > map(Encoder_Data[0], Motor_Min, Motor_Max, 0, 255)) Motor_UP(0);
+    if(AxisData[0] < map(Encoder_Data[0], Motor_Min, Motor_Max, 0, 255)) Motor_DW(0);
+    if(AxisData[0] == map(Encoder_Data[0], Motor_Min, Motor_Max, 0, 255)) Motor_ST(0);
+    
+    if(AxisData[1] > map(Encoder_Data[1], Motor_Min, Motor_Max, 0, 255)) Motor_UP(1);
+    if(AxisData[1] < map(Encoder_Data[1], Motor_Min, Motor_Max, 0, 255)) Motor_DW(1);
+    if(AxisData[1] == map(Encoder_Data[1], Motor_Min, Motor_Max, 0, 255)) Motor_ST(1);
+  
+    if(AxisData[2] > map(Encoder_Data[2], Motor_Min, Motor_Max, 0, 255)) Motor_UP(2);
+    if(AxisData[2] < map(Encoder_Data[2], Motor_Min, Motor_Max, 0, 255)) Motor_DW(2);
+    if(AxisData[2] == map(Encoder_Data[2], Motor_Min, Motor_Max, 0, 255)) Motor_ST(2);
+  }
+}
+

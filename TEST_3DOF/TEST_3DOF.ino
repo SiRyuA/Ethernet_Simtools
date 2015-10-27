@@ -18,10 +18,11 @@ int Motor_Max = 0;
 
 int delay_time = 100;
 
-char cRead= 0;
-char cTemp = 0;
-String sCommand = "";
-String sTemp = "";
+char visaRead= 0;
+char visaTemp = 0;
+String stringCommand = "";
+String stringTemp = "";
+String stringWrite = "";
 
 void setup()
 {                
@@ -30,7 +31,7 @@ void setup()
 
   Serial.println("contacted.");
   
-  delay(1000);
+  delay(100);
 
   for(char i=0; i<3; i++) {
     pinMode(Motor_CW[i], OUTPUT);
@@ -44,7 +45,7 @@ void setup()
 
   Serial.println("settings.");
 
-  delay(1000);
+  Motor_START();
 
   Serial.println("start.");
   Serial.flush();
@@ -56,51 +57,66 @@ void loop()                   
   if(Motor_work[nC] == 1) Motor_Encoder(nC);
   if(Motor_work[nR] == 1) Motor_Encoder(nR);
   
-  Command();
+  Command_Read();
+  Motor_moveSum();
 
-  if(cRead == 'Y') Motor_FULLUP();
-  if(cRead == 'X') Motor_FULLDOWN();
-  if(cRead == 'R') Motor_RESET();
+  stringWrite = "L";
+  stringWrite.concat(Encoder_Data[nL]);
+  stringWrite.concat("C");
+  stringWrite.concat(Encoder_Data[nC]);
+  stringWrite.concat("R");
+  stringWrite.concat(Encoder_Data[nR]);
 
-  if(GAxis_data[nL] > Encoder_Data[nL]) Motor_UP(nL);
-  if(GAxis_data[nL] < Encoder_Data[nL]) Motor_DW(nL);
-  if(GAxis_data[nL] == Encoder_Data[nL]) Motor_ST(nL);
-
-  if(GAxis_data[nC] > Encoder_Data[nC]) Motor_UP(nC);
-  if(GAxis_data[nC] < Encoder_Data[nC]) Motor_DW(nC);
-  if(GAxis_data[nC] == Encoder_Data[nC]) Motor_ST(nC);
-
-  if(GAxis_data[nR] > Encoder_Data[nR]) Motor_UP(nR);
-  if(GAxis_data[nR] < Encoder_Data[nR]) Motor_DW(nR);
-  if(GAxis_data[nR] == Encoder_Data[nR]) Motor_ST(nR);
-
+  Serial.println(stringWrite);
   delay(delay_time);
+  stringWrite="";
 }
 
-void Command(void) {
-  sCommand = "";
+void Command_Read() {
+  stringCommand = "";
   
   while(Serial.available())
   {
-    cRead = Serial.read();
-    cTemp = cRead;
-    sCommand.concat(cTemp);
+    visaRead = Serial.read();
+    visaTemp = visaRead;
+    stringCommand.concat(visaTemp);
   }
   
-  if(sCommand != "")
+  if(stringCommand != "")
   {
-    char cTempData[4];
+    char TempData[4];
   
-    sCommand.substring(1, 4).toCharArray(cTempData, 4);
-    GAxis_data[nL] = atoi(cTempData);
+    stringCommand.substring(1, 4).toCharArray(TempData, 4);
+    GAxis_data[nL] = atoi(TempData);
       
-    sCommand.substring(5, 8).toCharArray(cTempData, 4);
-    GAxis_data[nC] = atoi(cTempData);
+    stringCommand.substring(5, 8).toCharArray(TempData, 4);
+    GAxis_data[nC] = atoi(TempData);
       
-    sCommand.substring(9, 12).toCharArray(cTempData, 4);
-    GAxis_data[nR] = atoi(cTempData);
+    stringCommand.substring(9, 12).toCharArray(TempData, 4);
+    GAxis_data[nR] = atoi(TempData);
     
-    Serial.println(sCommand + ": L=" + GAxis_data[nL] + ", C=" + GAxis_data[nC] + ", R=" + GAxis_data[nR] ); 
+    Serial.println(stringCommand); 
+  }
+}
+
+void Motor_moveSum() {
+  if((visaRead == 'x') || (visaRead == 'y') || (visaRead == 'r') || (visaRead == 'X') || (visaRead == 'Y') || (visaRead == 'R')){
+    if((visaRead == 'x') || (visaRead == 'X')) Motor_FULLUP();
+    if((visaRead == 'y') || (visaRead == 'Y')) Motor_FULLDW();
+    if((visaRead == 'r') || (visaRead == 'R')) Motor_RESET();
+  }
+  else {
+    if(GAxis_data[nL] > Encoder_Data[nL]) Motor_UP(nL);
+    if(GAxis_data[nL] < Encoder_Data[nL]) Motor_DW(nL);
+    if(GAxis_data[nL] == Encoder_Data[nL]) Motor_ST(nL);
+  
+    if(GAxis_data[nR] > Encoder_Data[nR]) Motor_UP(nR);
+    if(GAxis_data[nR] < Encoder_Data[nR]) Motor_DW(nR);
+    if(GAxis_data[nR] == Encoder_Data[nR]) Motor_ST(nR);
+
+    if(GAxis_data[nC] > Encoder_Data[nC]) Motor_UP(nC);
+    if(GAxis_data[nC] < Encoder_Data[nC]) Motor_DW(nC);
+    if(GAxis_data[nC] == Encoder_Data[nC]) Motor_ST(nC);
   }
 }
 
@@ -121,6 +137,50 @@ void Motor_Encoder(int PORT) {
   }
   
   Encoder_Save[PORT] = Encoder_Data[PORT];
+}
+
+void Motor_START(){
+  Motor_FULLUP();
+  delay(2000);
+  Motor_FULLDW();
+  delay(4000);
+  Motor_RESET();
+}
+
+void Motor_FULLUP(){
+  for(char i=0; i<3; i++) Motor_ways[i] = 0;
+
+  for(char i=0; i<3; i++) {
+    digitalWrite(Motor_CW[i], HIGH);
+    digitalWrite(Motor_CCW[i], LOW);
+  }
+  Serial.flush();
+}
+
+void Motor_FULLDW(){
+  for(char i=0; i<3; i++) Motor_ways[i] = 0;
+
+  for(char i=0; i<3; i++) {
+    digitalWrite(Motor_CW[i], LOW);
+    digitalWrite(Motor_CCW[i], HIGH);
+  }
+  Serial.flush();
+}
+
+void Motor_RESET(){
+  for(char i=0; i<3; i++) {
+    Encoder_Data[i] = 0;
+    Encoder_Save[i] = 0;
+    Motor_work[i] = 0;
+    Motor_ways[i] = 0;
+  }
+  
+  for(char i=0; i<3; i++) {
+    digitalWrite(Motor_CW[i], LOW);
+    digitalWrite(Motor_CCW[i], LOW);
+    digitalWrite(Encoder[i], HIGH);
+  }
+  Serial.flush();
 }
 
 void Motor_UP(int PORT){
@@ -148,40 +208,3 @@ void Motor_DW(int PORT){
   digitalWrite(Motor_CW[PORT], LOW);
   digitalWrite(Motor_CCW[PORT], HIGH);
 }
-
-void Motor_FULLUP(){
-  for(char i=0; i<3; i++) Motor_ways[i] = 0;
-
-  for(char i=0; i<3; i++) {
-    digitalWrite(Motor_CW[i], HIGH);
-    digitalWrite(Motor_CCW[i], LOW);
-  }
-  Serial.flush();
-}
-
-void Motor_FULLDOWN(){
-  for(char i=0; i<3; i++) Motor_ways[i] = 0;
-
-  for(char i=0; i<3; i++) {
-    digitalWrite(Motor_CW[i], LOW);
-    digitalWrite(Motor_CCW[i], HIGH);
-  }
-  Serial.flush();
-}
-
-void Motor_RESET(){
-  for(char i=0; i<3; i++) {
-    Encoder_Data[i] = 0;X
-    Encoder_Save[i] = 0;
-    Motor_work[i] = 0;
-    Motor_ways[i] = 0;
-  }
-  
-  for(char i=0; i<3; i++) {
-    digitalWrite(Motor_CW[i], LOW);
-    digitalWrite(Motor_CCW[i], LOW);
-    digitalWrite(Encoder[i], HIGH);
-  }
-  Serial.flush();
-}
-
