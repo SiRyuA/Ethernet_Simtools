@@ -65,26 +65,8 @@ void loop() {
   }
 
   Move();
-
-  stringWrite = "L";
-  stringWrite.concat(map(Encoder_Data[0], Motor_Min, Motor_Max, 0, 255));
-  stringWrite.concat("C");
-  stringWrite.concat(map(Encoder_Data[1], Motor_Min, Motor_Max, 0, 255));
-  stringWrite.concat("R");
-  stringWrite.concat(map(Encoder_Data[2], Motor_Min, Motor_Max, 0, 255));
-
-  Serial.print(stringWrite);
-  Serial.print("\t");
-  Serial.print(AxisControl);
-  Serial.print("\t");
-  Serial.print(AxisData[0]);
-  Serial.print("\t");
-  Serial.print(AxisData[1]);
-  Serial.print("\t");
-  Serial.print(AxisData[2]);
-  Serial.println("");
+  String_println();
   delay(delay_time);
-  stringWrite="";
 }
 
 void splitString(char* data) {
@@ -102,6 +84,28 @@ void splitString(char* data) {
   Serial.flush();
 }
 
+void String_println() {
+  stringWrite = "L";
+  stringWrite.concat(map(Encoder_Data[0], Motor_Min, Motor_Max, 0, 255));
+  stringWrite.concat("C");
+  stringWrite.concat(map(Encoder_Data[1], Motor_Min, Motor_Max, 0, 255));
+  stringWrite.concat("R");
+  stringWrite.concat(map(Encoder_Data[2], Motor_Min, Motor_Max, 0, 255));
+
+  Serial.print(stringWrite);
+  Serial.print("\t");
+  Serial.print(AxisControl);
+  Serial.print("\t");
+  Serial.print(AxisData[0]);
+  Serial.print("\t");
+  Serial.print(AxisData[1]);
+  Serial.print("\t");
+  Serial.print(AxisData[2]);
+  Serial.println("");
+  
+  stringWrite="";
+}
+
 void Command(char* data) {
   if((data[0] == 'L') || (data[0] == 'l')) {
     AxisRead = strtol(data+1, NULL, 10);
@@ -110,18 +114,18 @@ void Command(char* data) {
     AxisData[0] = AxisRead;
   }
   
-  if((data[0] == 'C') || (data[0] == 'c')) {
-    AxisRead = strtol(data+1, NULL, 10);
-    AxisRead = constrain(AxisRead, 0, 255);
-
-    AxisData[1] = AxisRead;
-  }
-  
   if((data[0] == 'R') || (data[0] == 'r')) {
     AxisRead = strtol(data+1, NULL, 10);
     AxisRead = constrain(AxisRead, 0, 255);
 
     AxisData[2] = AxisRead;
+  }
+  
+  if((data[0] == 'C') || (data[0] == 'c')) {
+    AxisRead = strtol(data+1, NULL, 10);
+    AxisRead = constrain(AxisRead, 0, 255);
+
+    AxisData[1] = AxisRead;
   }
   
   if((data[0] == 'X') || (data[0] == 'x')) AxisControl = 'x';
@@ -136,13 +140,13 @@ void Move(){
     if(AxisControl == 'y') Motor_FULLDW();
     if(AxisControl == 'z') Motor_RESET();
   }else {
-    if(AxisData[0] > map(Encoder_Data[0], Motor_Min, Motor_Max, 0, 255)) Motor_UP(0);
-    if(AxisData[0] < map(Encoder_Data[0], Motor_Min, Motor_Max, 0, 255)) Motor_DW(0);
-    if(AxisData[0] == map(Encoder_Data[0], Motor_Min, Motor_Max, 0, 255)) Motor_ST(0);
-    
     if(AxisData[1] > map(Encoder_Data[1], Motor_Min, Motor_Max, 0, 255)) Motor_UP(1);
     if(AxisData[1] < map(Encoder_Data[1], Motor_Min, Motor_Max, 0, 255)) Motor_DW(1);
     if(AxisData[1] == map(Encoder_Data[1], Motor_Min, Motor_Max, 0, 255)) Motor_ST(1);
+    
+    if(AxisData[0] > map(Encoder_Data[0], Motor_Min, Motor_Max, 0, 255)) Motor_UP(0);
+    if(AxisData[0] < map(Encoder_Data[0], Motor_Min, Motor_Max, 0, 255)) Motor_DW(0);
+    if(AxisData[0] == map(Encoder_Data[0], Motor_Min, Motor_Max, 0, 255)) Motor_ST(0);
   
     if(AxisData[2] > map(Encoder_Data[2], Motor_Min, Motor_Max, 0, 255)) Motor_UP(2);
     if(AxisData[2] < map(Encoder_Data[2], Motor_Min, Motor_Max, 0, 255)) Motor_DW(2);
