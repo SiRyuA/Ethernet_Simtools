@@ -111,5 +111,15 @@ void Motor_WORK() {
   if(Axis_Data[Motor_R]  > Encoder_Data[Motor_R]) Motor_UP(Motor_R);
   if(Axis_Data[Motor_R]  < Encoder_Data[Motor_R]) Motor_DW(Motor_R);
   if(Axis_Data[Motor_R] == Encoder_Data[Motor_R]) Motor_ST(Motor_R);
+
+  for(char i=0; i<3; i++) {
+    Serial.print(Encoder_Data[i]);
+    Serial.print("\t");
+  }
+  for(char i=0; i<3; i++) {
+    Serial.print(Axis_Data[i]);
+    Serial.print("\t");
+  }
+  Serial.print("\n");
 }
 

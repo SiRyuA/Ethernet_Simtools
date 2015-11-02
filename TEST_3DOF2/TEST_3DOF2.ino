@@ -6,7 +6,7 @@
 
 #define Min 0
 #define Axis_Max 255
-#define Motor_Max 80
+#define Motor_Max 100
 
 int Motor_CW[3] = {22,28,36}; 
 int Motor_CCW[3] = {27,12,37}; 
@@ -42,6 +42,10 @@ void setup() {
 } 
 
 void loop() {
+  if(Motor_work[Motor_L] == 1) Motor_Encoder(Motor_L);
+  if(Motor_work[Motor_M] == 1) Motor_Encoder(Motor_M);
+  if(Motor_work[Motor_R] == 1) Motor_Encoder(Motor_R);
+  
   while (Serial.available() > 0) {
     //visaRead = Serial.readString();
     visaRead = Serial.readStringUntil(';');
@@ -56,7 +60,7 @@ void loop() {
         if((visaRead == "X") || (visaRead == "x")) Motor_RST();
       }else stringMotorAxis();
     }
-    Serial.println("\n");
+    Serial.println("\n\n");
   }
   Motor_WORK();
   
