@@ -104,9 +104,9 @@ void Motor_WORK() {
   if(Axis_Data[Motor_M]  < Encoder_Data[Motor_M]) Motor_DW(Motor_M);
   if(Axis_Data[Motor_M] == Encoder_Data[Motor_M]) Motor_ST(Motor_M);
   
-  if(Axis_Data[Motor_R]  > Encoder_Data[Motor_L]) Motor_UP(Motor_L);
-  if(Axis_Data[Motor_R]  < Encoder_Data[Motor_L]) Motor_DW(Motor_L);
-  if(Axis_Data[Motor_R] == Encoder_Data[Motor_L]) Motor_ST(Motor_L);
+  if(Axis_Data[Motor_L]  > Encoder_Data[Motor_L]) Motor_UP(Motor_L);
+  if(Axis_Data[Motor_L]  < Encoder_Data[Motor_L]) Motor_DW(Motor_L);
+  if(Axis_Data[Motor_L] == Encoder_Data[Motor_L]) Motor_ST(Motor_L);
 
   if(Axis_Data[Motor_R]  > Encoder_Data[Motor_R]) Motor_UP(Motor_R);
   if(Axis_Data[Motor_R]  < Encoder_Data[Motor_R]) Motor_DW(Motor_R);

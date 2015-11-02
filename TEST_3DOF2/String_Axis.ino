@@ -31,7 +31,7 @@ void stringMotorAxis() {
     Serial.print(Axis_Data[Motor_L]);
     Serial.print("\t");
   }
-  if((cTemp1[0] == 'M') || (cTemp1[0] == 'm')) {
+  /*if((cTemp1[0] == 'M') || (cTemp1[0] == 'm')) {
     Axis_Data[Motor_M] = strtol(cTemp1+1, NULL, 10);
     Axis_Data[Motor_M] = map(constrain(Axis_Data[Motor_M], Min, Axis_Max), Min, Axis_Max, Min, Motor_Max);
     Serial.print("M : ");
@@ -44,15 +44,15 @@ void stringMotorAxis() {
     Serial.print("R : ");
     Serial.print(Axis_Data[Motor_R]);
     Serial.print("\t");
-  }
+  }*/
   
-  if((cTemp2[0] == 'L') || (cTemp2[0] == 'l')) {
+  /*if((cTemp2[0] == 'L') || (cTemp2[0] == 'l')) {
     Axis_Data[Motor_L] = strtol(cTemp2+1, NULL, 10);
     Axis_Data[Motor_L] = map(constrain(Axis_Data[Motor_L], Min, Axis_Max), Min, Axis_Max, Min, Motor_Max);
     Serial.print("L : ");
     Serial.print(Axis_Data[Motor_L]);
     Serial.print("\t");
-  }
+  }*/
   if((cTemp2[0] == 'M') || (cTemp2[0] == 'm')) {
     Axis_Data[Motor_M] = strtol(cTemp2+1, NULL, 10);
     Axis_Data[Motor_M] = map(constrain(Axis_Data[Motor_M], Min, Axis_Max), Min, Axis_Max, Min, Motor_Max);
@@ -60,15 +60,15 @@ void stringMotorAxis() {
     Serial.print(Axis_Data[Motor_M]);
     Serial.print("\t");
   }
-  if((cTemp2[0] == 'R') || (cTemp2[0] == 'r')) {
+  /*if((cTemp2[0] == 'R') || (cTemp2[0] == 'r')) {
     Axis_Data[Motor_R] = strtol(cTemp2+1, NULL, 10);
     Axis_Data[Motor_R] = map(constrain(Axis_Data[Motor_R], Min, Axis_Max), Min, Axis_Max, Min, Motor_Max);
     Serial.print("R : ");
     Serial.print(Axis_Data[Motor_R]);
     Serial.print("\t");
-  }
+  }*/
   
-  if((cTemp3[0] == 'L') || (cTemp3[0] == 'l')) {
+  /*if((cTemp3[0] == 'L') || (cTemp3[0] == 'l')) {
     Axis_Data[Motor_L] = strtol(cTemp3+1, NULL, 10);
     Axis_Data[Motor_L] = map(constrain(Axis_Data[Motor_L], Min, Axis_Max), Min, Axis_Max, Min, Motor_Max);
     Serial.print("L : ");
@@ -81,7 +81,7 @@ void stringMotorAxis() {
     Serial.print("M : ");
     Serial.print(Axis_Data[Motor_M]);
     Serial.print("\n");
-  }
+  }*/
   if((cTemp3[0] == 'R') || (cTemp3[0] == 'r')) {
     Axis_Data[Motor_R] = strtol(cTemp3+1, NULL, 10);
     Axis_Data[Motor_R] = map(constrain(Axis_Data[Motor_R], Min, Axis_Max), Min, Axis_Max, Min, Motor_Max);
